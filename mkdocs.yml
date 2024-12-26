@@ -161,6 +161,6 @@ markdown_extensions:
       custom_checkbox: true
 
 nav:
-  - 首页: 
+  - 入门: 
     - index.md
     
