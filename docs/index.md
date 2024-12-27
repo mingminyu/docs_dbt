@@ -7,3 +7,14 @@ dbt 针对数据平台编译并运行分析代码，使团队能够在指标、�
 ![dbt 可与提取、可视化和其他数据工具配合使用](images/20241226-01.png)
 
 
+在 [dbt Viewpoint](https://docs.getdbt.com/community/resources/viewpoint) 中详细了解为什么我们希望让分析师能够更像软件工程师一样工作。[加入 dbt 社区](https://www.getdbt.com/community/join-the-community)，了解世界各地的其他数据从业者如何使用 dbt。
+
+## 1. DBT 产品
+
+通过 DBT 可以按照版本控制、模块化、可移植性、CI/CD 和文档等软件工程最佳实践的方式快速协作地转换数据，并部署分析代码。这意味着数据团队中熟悉 SQL 的任何人都可以安全地为生产级数据管道做出贡献。
+
+### 1.1 DBT Cloud
+
+
+
+### 1.1 DBT Core
