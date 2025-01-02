@@ -102,3 +102,6 @@ restrict-access: true | false
           +cache:
             enabled: true
     ```
+
+## 2. .dbtignore
+
