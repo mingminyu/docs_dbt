@@ -19,7 +19,7 @@ DBT Core 是一个命令行开源工具，使数据从业者能够使用分析�
 
 <div class="grid cards" markdown>
 
-- :simple-dbt: &nbsp; 手动安装 DBT Core
+- :simple-dbt: &nbsp; [手动安装 DBT Core](./guides/manual-install.md)
 
     ---
     了解如何安装 DBT Core 并设置项目。

@@ -164,5 +164,18 @@ nav:
   - 教程: 
     - index.md
     - 快速入门: quickstart.md
+    - 支持的数据平台: supported-data-platforms.md
+    - 搭建 DBT: 
+      - 运行项目: setup/run-dbt-projects.md
+      - 使用线程: setup/use-threads.md
+    
+  - 指南:
+    - 手动安装DBT Core: guides/manual-install.md
+
+  - 参考:
+    - references/index.md
+    - 项目设置: references/project-configs.md
+
+  - DBT Cloud: dbt-cloud/index.md
 
     
