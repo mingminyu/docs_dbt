@@ -174,7 +174,10 @@ nav:
 
   - 参考:
     - references/index.md
-    - 项目设置: references/project-configs.md
+    - 项目配置: references/project-configs.md
+    - 特定平台配置: references/platform-configs.md
+    - 资源配置和属性: references/resource-configs-properties.md
+
 
   - DBT Cloud: dbt-cloud/index.md
 
