@@ -176,6 +176,10 @@ nav:
     - references/index.md
     - 项目配置: references/project-configs.md
     - 特定平台配置: references/platform-configs.md
-    - 资源配置和属性: references/resource-configs-properties.md
+    - 资源配置和属性: 
+      - references/resource-configs-properties/index.md
+      - 资源路径: references/resource-configs-properties/resource-paths.md
+      - 通用属性: references/resource-configs-properties/general-properties.md
+      - 通用配置: references/resource-configs-properties/general-configs.md
 
   - DBT Cloud: dbt-cloud/index.md
