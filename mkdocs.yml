@@ -178,7 +178,4 @@ nav:
     - 特定平台配置: references/platform-configs.md
     - 资源配置和属性: references/resource-configs-properties.md
 
-
   - DBT Cloud: dbt-cloud/index.md
-
-    
