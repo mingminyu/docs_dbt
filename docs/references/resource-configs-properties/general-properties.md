@@ -281,7 +281,7 @@ models:
     config:
       contract: {enforced: true}
     
-    # model-level constraints
+    # 模型层的约束
     constraints:
       - type: primary_key
         columns: [first_column, second_column, ...]
@@ -321,40 +321,66 @@ models:
 - 当 `warn_unsupported: False` 时，则跳过此数据平台不支持的约束的警告，因此不会包含在模板化 DDL 中。
 
 
-=== "Postgres"
+以下为 PostgreSQL 的示例，其他数据库请参考[此文档](https://docs.getdbt.com/reference/resource-properties/constraints)：
 
-    ```sql title="models/constraints_example.sql" linenums="1"
-    {{
-      config(
-        materialized = "table"
-      )
-    }}
+```sql title="models/constraints_example.sql" linenums="1"
+{{
+  config(
+    materialized = "table"
+  )
+}}
 
-    select 
-      1 as id, 
-      'My Favorite Customer' as customer_name, 
-      cast('2019-01-01' as date) as first_transaction_date
-    ```
+select 
+  1 as id, 
+  'My Favorite Customer' as customer_name, 
+  cast('2019-01-01' as date) as first_transaction_date
+```
 
-    ```yaml title="models/schema.yaml" linenums="1"
-    models:
-      - name: dim_customers
-        config:
-          contract:
-            enforced: true
-        columns:
-          - name: id
-            data_type: int
-            constraints:
-              - type: not_null
-              - type: primary_key
-              - type: check
-                expression: "id > 0"
-          - name: customer_name
-            data_type: text
-          - name: first_transaction_date
-            data_type: date
-    ```
+```yaml title="models/schema.yaml" linenums="1"
+models:
+  - name: dim_customers
+    config:
+      contract:
+        enforced: true
+    columns:
+      - name: id
+        data_type: int
+        constraints:
+          - type: not_null
+          - type: primary_key
+          - type: check
+            expression: "id > 0"
+      - name: customer_name
+        data_type: text
+      - name: first_transaction_date
+        data_type: date
+```
+
+预期 DDL 强制执行约束：
+
+```sql title="target/run/.../constraints_example.sql" linenums="1"
+create table "database_name"."schema_name"."constraints_example__dbt_tmp"
+( 
+    id integer not null primary key check (id > 0),
+    customer_name text,
+    first_transaction_date date    
+)
+;
+insert into "database_name"."schema_name"."constraints_example__dbt_tmp" 
+(   
+    id,
+    customer_name,  
+    first_transaction_date
+) 
+(
+select 
+    1 as id, 
+    'My Favorite Customer' as customer_name, 
+    cast('2019-01-01' as date) as first_transaction_date
+);
+```
+
+
 
 ### 3.3 自定义约束
 
