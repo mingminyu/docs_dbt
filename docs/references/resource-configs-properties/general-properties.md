@@ -258,12 +258,155 @@
 
 如果为单个模型定义多个 `primary_key` 约束，则必须在模型级别定义这些约束。不支持在列级别定义多个 `primary_key` 约束。
 
+约束的结构是：
+
+- `type`（必需的）: `not_null`、`unique`、`primary_key`、`check`、`foreign_key`、`custom`
+- `expression`: 自由文本输入以限定约束。对于某些约束类型是必需的，对于其他约束类型是可选的。
+- `name`（可选）: 约束名称，部分数据平台支持。
+- `columns`（仅限模型级别）: 约束应用于的列名列表。
+
+外键约束接受两个附加输入：
+
+- `to`: 关系输入，可能是 `ref()`，指示引用的表。
+- `to_columns`: 该表中包含相应主键或者唯一键的列名列表。
+
+
+这种定义外键的语法使用 `ref`，这意味着它将捕获依赖关系并跨不同环境工作。它在 DBT Cloud“最新”和 DBT Core v1.9+ 中可用。
+
+```yaml title="models/schema.yml" linenums="1"
+models:
+  - name: <model_name>
+    
+    # required
+    config:
+      contract: {enforced: true}
+    
+    # model-level constraints
+    constraints:
+      - type: primary_key
+        columns: [first_column, second_column, ...]
+      - type: foreign_key # multi_column
+        columns: [first_column, second_column, ...]
+        to: ref('other_model_name')
+        to_columns: [other_model_first_column, other_model_second_columns, ...]
+      - type: check
+        columns: [first_column, second_column, ...]
+        expression: "first_column != second_column"
+        name: human_friendly_name
+      - type: ...
+    
+    columns:
+      - name: first_column
+        data_type: string
+        
+        # column-level constraints
+        constraints:
+          - type: not_null
+          - type: unique
+          - type: foreign_key
+            to: ref('other_model_name')
+            to_columns: [other_model_column]
+          - type: ...
+```
+
 ### 3.2 特殊平台支持
+
+在事务数据库中，可以对某些列的允许值定义“约束”，比这些值的数据类型更严格。例如，Postgres 支持并强制执行 ANSI SQL 标准中的所有约束（非空、唯一、主键、外键），以及计算结果为布尔表达式的灵活的行级检查约束。
+
+大多数分析数据平台支持并强制执行非空约束，但它们要么不支持，要么不强制执行其余约束。有时仍然需要添加“信息”约束，因为知道它没有强制执行，以便与遗留数据目录或实体关系图工具集成（dbt-core#3295）。如果我们指定额外关键字，某些数据平台可以选择使用主键或外键约束来优化查询。
+
+为此，我们可以在任何过滤器上指定两个可选字段：
+
+- 当 `warn_unenforced: False` 时，则跳过此数据平台支持但不强制执行的约束的警告。该约束将包含在模板化 DDL 中。
+- 当 `warn_unsupported: False` 时，则跳过此数据平台不支持的约束的警告，因此不会包含在模板化 DDL 中。
+
+
+=== "Postgres"
+
+    ```sql title="models/constraints_example.sql" linenums="1"
+    {{
+      config(
+        materialized = "table"
+      )
+    }}
+
+    select 
+      1 as id, 
+      'My Favorite Customer' as customer_name, 
+      cast('2019-01-01' as date) as first_transaction_date
+    ```
+
+    ```yaml title="models/schema.yaml" linenums="1"
+    models:
+      - name: dim_customers
+        config:
+          contract:
+            enforced: true
+        columns:
+          - name: id
+            data_type: int
+            constraints:
+              - type: not_null
+              - type: primary_key
+              - type: check
+                expression: "id > 0"
+          - name: customer_name
+            data_type: text
+          - name: first_transaction_date
+            data_type: date
+    ```
 
 ### 3.3 自定义约束
 
+在 DBT Cloud 和 DBT Core 中，我们可以对模型使用自定义约束来进行表的高级配置。不同的数据仓库支持不同的语法和功能。
+
+自定义约束允许我们向特定列添加配置，例如：
+
+- 使用 `Create Table As Select` 语法创建表时，在 Snowflake 中设置掩码策略。
+- 其他数据仓库（例如 Databrikcs 和 BigQuery） 有自己的一组参数，可以在其 CTAS 语句中为列设置这些参数。
+
+我们可以通过几种不同的方式实现约束：
+
+??? info "带标签的自定义约束"
+
+    以下是如何使用以下语法通过合同和约束实施基于标签的掩码策略的示例：
+
+    ```yaml title="models/constraints_example.yml" linenums="1"
+    models:
+      - name: my_model
+        config:
+          contract:
+            enforced: true
+          materialized: table
+        columns:
+          - name: id
+            data_type: int
+            constraints:
+              - type: custom
+                expression: "tag (my_tag = 'my_value')"  #  自定义 SQL 表达式被用来给列强制添加约束
+    ```
+
+    使用此语法需要配置所有列及其类型，因为这是将 `create` 或 `replace <cols_info_with_masking> mytable as ...` 发送的唯一方法不能只使用部分列列表来做到这一点。这意味着确保 `columns` 和 `constraints` 字段已完全定义。
+
+    要生成包含所有列的 YAML，我们可以使用 [dbt-codegen](https://github.com/dbt-labs/dbt-codegen/tree/0.12.1/?tab=readme-ov-file#generate_model_yaml-source) 中的 `generate_model_yaml`。
 
 
+??? info "不带标签的自定义约束"
 
+    或者，我们可以添加不带标签的掩码策略：
 
+    ```yaml title="models/constraints_example.yml" linenums="1"
+    models:
+      - name: my_model
+        config:
+          contract:
+            enforced: true
+          materialized: table
+        columns:
+          - name: id
+            data_type: int
+            constraints:
+              - type: custom
+                expression: "masking policy my_policy"
+    ```
 
