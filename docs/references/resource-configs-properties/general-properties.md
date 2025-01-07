@@ -380,8 +380,6 @@ select
 );
 ```
 
-
-
 ### 3.3 自定义约束
 
 在 DBT Cloud 和 DBT Core 中，我们可以对模型使用自定义约束来进行表的高级配置。不同的数据仓库支持不同的语法和功能。
@@ -435,4 +433,6 @@ select
               - type: custom
                 expression: "masking policy my_policy"
     ```
+
+## 4. deprecation_date
 
