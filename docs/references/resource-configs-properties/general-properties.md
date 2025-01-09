@@ -285,7 +285,7 @@ models:
     constraints:
       - type: primary_key
         columns: [first_column, second_column, ...]
-      - type: foreign_key # multi_column
+      - type: foreign_key  # 多列
         columns: [first_column, second_column, ...]
         to: ref('other_model_name')
         to_columns: [other_model_first_column, other_model_second_columns, ...]
